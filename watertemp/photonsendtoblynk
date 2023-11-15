@@ -1,0 +1,56 @@
+#define BLYNK_TEMPLATE_ID "TMPL2xhJw3m-l"
+#define BLYNK_TEMPLATE_NAME "Connect a Particle device"
+#define BLYNK_AUTH_TOKEN "Dz8lRG_g1vxhcT3Vo267eXXoWtADVGZF"
+#include <blynk.h>
+#include "OneWire.h"
+#include <OneWire.h>
+#include "DS18.h"
+
+#define ONE_WIRE_BUS D0
+DS18 sensor(D0);
+
+
+char auth[] = "Dz8lRG_g1vxhcT3Vo267eXXoWtADVGZF";
+
+
+// break
+
+// #define BLYNK_PRINT Serial // Comment this out to disable prints and save space
+
+OneWire oneWire(ONE_WIRE_BUS);
+BlynkTimer timer;
+
+
+double temp;  
+
+    void setup()
+    {
+     Serial.begin(115200);
+     Blynk.begin(auth);
+     timer.setInterval(30000L, sendTemps);
+     Particle.variable("Temp", temp); //assign variables that .publish can later pull
+    }
+
+  
+void sendTemps()
+  {
+//  sensor.read(); // Polls the sensors
+ if (sensor.read()) {
+    // Do something cool with the temperature
+//    Serial.printf("Temperature %.2f C %.2f F ", sensor.celsius(), sensor.fahrenheit());
+//    Particle.publish("temperature", String(sensor.celsius()), PRIVATE);
+    // Additional info useful while debugging
+  temp  = sensor.fahrenheit(); // Gets temp in F
+  Blynk.virtualWrite(V0, temp); //Writes to Blynk, at virtual pin 0
+  Particle.publish("Temp", String(sensor.fahrenheit()), PRIVATE); //Send data to Particle console, used to verify data sent
+ }
+  else
+    {
+      Serial.println("Unable to read sensor");
+  }
+}
+    void loop()
+    {
+       Blynk.run();
+       timer.run();    
+    }
